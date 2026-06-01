@@ -203,11 +203,22 @@ class BookPlayViewModel(
   }
 
   fun next() {
-    player.next()
+    seekBy(30_000L)
+  }
+
+  private fun seekBy(ms: Long) {
+    scope.launch {
+      val book = currentBook() ?: return@launch
+      val currentChapter = book.currentChapter
+      val currentMark = currentChapter.markForPosition(book.content.positionInChapter)
+      val newPosition = (book.content.positionInChapter + ms)
+        .coerceIn(0L, currentChapter.duration)
+      player.setPosition(newPosition, currentChapter.id)
+    }
   }
 
   fun previous() {
-    player.previous()
+    seekBy(-30_000L)
   }
 
   fun playPause() {
