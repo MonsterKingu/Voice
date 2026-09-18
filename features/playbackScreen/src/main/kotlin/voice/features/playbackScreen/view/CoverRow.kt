@@ -1,5 +1,6 @@
 package voice.features.playbackScreen.view
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -9,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import voice.core.strings.R
@@ -21,13 +23,27 @@ internal fun CoverRow(
   cover: ImmutableFile?,
   sleepTimerState: BookPlayViewState.SleepTimerViewState,
   onPlayClick: () -> Unit,
+  playedTime: kotlin.time.Duration,
+  duration: kotlin.time.Duration,
+  playing: Boolean,
   modifier: Modifier = Modifier,
 ) {
+  val context = LocalContext.current
+
   Box(modifier) {
-    Cover(onDoubleClick = onPlayClick, cover = cover)
+    if (context.resources.getIdentifier("recorder", "drawable", context.packageName) != 0) {
+      ReelToReelPlayer(
+        playedTime = playedTime,
+        duration = duration,
+        playing = playing,
+        onDoubleClick = onPlayClick,
+      )
+    } else {
+      Cover(onDoubleClick = onPlayClick, cover = cover)
+    }
+
     when (sleepTimerState) {
-      BookPlayViewState.SleepTimerViewState.Disabled -> {
-      }
+      BookPlayViewState.SleepTimerViewState.Disabled -> Unit
       is BookPlayViewState.SleepTimerViewState.Enabled -> {
         Text(
           modifier = Modifier
