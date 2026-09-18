@@ -4,10 +4,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -16,16 +14,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.isActive
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.time.Duration
+
+private const val RECORDER_WIDTH = 704f
+private const val RECORDER_HEIGHT = 753f
+private const val REEL_SIZE = 330f
+
+private const val LEFT_REEL_CENTER_X = 206f
+private const val LEFT_REEL_CENTER_Y = 260f
+private const val RIGHT_REEL_CENTER_X = 502f
+private const val RIGHT_REEL_CENTER_Y = 260f
 
 private const val CORE_RADIUS_FACTOR = 0.22f
 private const val OUTER_RADIUS_FACTOR = 0.50f
@@ -74,44 +82,57 @@ internal fun ReelToReelPlayer(
     modifier = modifier.pointerInput(Unit) {
       detectTapGestures(onDoubleTap = { onDoubleClick() })
     },
-    contentAlignment = Alignment.Center,
   ) {
-    BoxWithConstraints(Modifier.fillMaxSize()) {
-      if (recorder != 0) {
-        Image(
-          painter = painterResource(recorder),
-          contentDescription = null,
-          contentScale = ContentScale.Fit,
-          modifier = Modifier.fillMaxSize(),
-        )
-      }
+    BoxWithConstraints {
+      val scale = min(
+        maxWidth.value / RECORDER_WIDTH,
+        maxHeight.value / RECORDER_HEIGHT,
+      )
 
-      if (leftReel != 0) {
-        Image(
-          painter = painterResource(leftReel),
-          contentDescription = null,
-          contentScale = ContentScale.Fit,
-          modifier = Modifier
-            .align(Alignment.CenterStart)
-            .fillMaxWidth(0.38f)
-            .aspectRatio(1f)
-            .offset(x = maxWidth * 0.055f)
-            .graphicsLayer { rotationZ = -leftRotation },
-        )
-      }
+      Box(
+        modifier = Modifier.size(
+          width = (RECORDER_WIDTH * scale).dp,
+          height = (RECORDER_HEIGHT * scale).dp,
+        ),
+      ) {
+        if (recorder != 0) {
+          Image(
+            painter = painterResource(recorder),
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier.matchParentSize(),
+          )
+        }
 
-      if (rightReel != 0) {
-        Image(
-          painter = painterResource(rightReel),
-          contentDescription = null,
-          contentScale = ContentScale.Fit,
-          modifier = Modifier
-            .align(Alignment.CenterEnd)
-            .fillMaxWidth(0.38f)
-            .aspectRatio(1f)
-            .offset(x = -(maxWidth * 0.055f))
-            .graphicsLayer { rotationZ = -rightRotation },
-        )
+        if (leftReel != 0) {
+          Image(
+            painter = painterResource(leftReel),
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier
+              .size((REEL_SIZE * scale).dp)
+              .offset(
+                x = ((LEFT_REEL_CENTER_X - REEL_SIZE / 2f) * scale).dp,
+                y = ((LEFT_REEL_CENTER_Y - REEL_SIZE / 2f) * scale).dp,
+              )
+              .graphicsLayer { rotationZ = -leftRotation },
+          )
+        }
+
+        if (rightReel != 0) {
+          Image(
+            painter = painterResource(rightReel),
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier
+              .size((REEL_SIZE * scale).dp)
+              .offset(
+                x = ((RIGHT_REEL_CENTER_X - REEL_SIZE / 2f) * scale).dp,
+                y = ((RIGHT_REEL_CENTER_Y - REEL_SIZE / 2f) * scale).dp,
+              )
+              .graphicsLayer { rotationZ = -rightRotation },
+          )
+        }
       }
     }
   }
